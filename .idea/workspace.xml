@@ -1439,7 +1439,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "E:/Code/FutORAMcpp/src",
+    "last_opened_file_path": "E:/Code/FutORAMcpp/include",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -1452,8 +1452,10 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\Code\FutORAMcpp\src" />
       <recent name="E:\Code\FutORAMcpp\include" />
+      <recent name="E:\Code\FutORAMcpp\include\third_party" />
+      <recent name="E:\Code\FutORAMcpp\src" />
+      <recent name="E:\Code\FutORAMcpp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Code\FutORAMcpp\include" />
@@ -1474,7 +1476,8 @@
       <workItem from="1743326966283" duration="12393000" />
       <workItem from="1743353564803" duration="2069000" />
       <workItem from="1743388586760" duration="9644000" />
-      <workItem from="1743428447520" duration="1462000" />
+      <workItem from="1743428447520" duration="2313000" />
+      <workItem from="1743430818677" duration="6840000" />
     </task>
     <servers />
   </component>
