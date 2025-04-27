@@ -49,6 +49,15 @@ public:
     static constexpr uint8_t DUMMY_STATUS = 0x00;
     static constexpr uint8_t DATA_STATUS = 0x01;
     static constexpr uint8_t SECOND_DUMMY_STATUS = 0x02;
+    
+    static constexpr size_t BLOCK_STATUS_POSITION = BLOCK_DATA_SIZE;
+    static constexpr size_t BLOCK_SIZE = BLOCK_DATA_SIZE + 1 + KEY_SIZE;
+    static constexpr size_t DATA_SIZE = N * BLOCK_SIZE;
+    size_t OVERFLOW_SIZE = static_cast<size_t>(std::ceil(DATA_SIZE * EPSILON));
+    size_t NUMBER_OF_BINS_IN_OVERFLOW =
+            static_cast<size_t>(std::pow(2, std::ceil(std::log2(std::ceil(EPSILON * N / MU)))));
+
+    bool FINAL = false;
 
     explicit Config(size_t n = (1 << 20)) : N(n) {
         reset();
@@ -94,15 +103,7 @@ private:
         return bytes;
     }
 
-    // 复合参数计算
-    static constexpr size_t BLOCK_STATUS_POSITION = BLOCK_DATA_SIZE;
-    static constexpr size_t BLOCK_SIZE = BLOCK_DATA_SIZE + 1 + KEY_SIZE;
-    static constexpr size_t DATA_SIZE = N * BLOCK_SIZE;
-    size_t OVERFLOW_SIZE = static_cast<size_t>(std::ceil(DATA_SIZE * EPSILON));
-    size_t NUMBER_OF_BINS_IN_OVERFLOW =
-            static_cast<size_t>(std::pow(2, std::ceil(std::log2(std::ceil(EPSILON * N / MU)))));
 
-    bool FINAL = false;
 };
 
 

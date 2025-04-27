@@ -12,48 +12,65 @@
 #include "Block.h"
 #include "UntrustedStorageInterface.h"
 #include "ByteOperations.h"
-#include "CuckooHash.h"
+#include "Config.h"
+#include "localRam.h"
 #include "ObliviousSort.h"
+#include "ThresholdGenerator.h"
+#include "cuckooHash.h"
+
 
 class HashTable {
 public:
-    explicit HashTable(const Config& config);
+    HashTable( Config conf);
     void rebuild(size_t reals);
-    Block lookup(const std::vector<uint8_t>& key);
-    void extract();
-
-private:
+    Block lookup(const size_t key);
+    void extract();    
     // 配置和组件
     Config conf;
+    bool is_built = false;
     ByteOperations byte_ops;
-    std::unique_ptr<UntrustedStorageInterface> data_ram;
-    std::unique_ptr<UntrustedStorageInterface> bins_ram;
-    std::unique_ptr<UntrustedStorageInterface> overflow_ram;
-    std::unique_ptr<UntrustedStorageInterface> second_overflow_ram;
+    LocalRAM data_ram;
+    LocalRAM bins_ram;
+    std::unordered_map<size_t,Block> local_stash;
+    LocalRAM overflow_ram;
+    LocalRAM second_overflow_ram;
     CuckooHash cuckoo;
+    ThresholdGenerator threshold_generator;
+    size_t reals_count = 0;
+
+private:
+
 
     // 临时存储
     std::unordered_map<std::vector<uint8_t>, Block> local_stash;
-    std::vector<Block> dummy_blocks;
+    std::vector<Block> dummy_blocks = std::vector<Block>(conf.BIN_SIZE, Block(-1, -1, false));
 
     // 核心方法
-    void createDummies(size_t count);
-    void tightCompaction(size_t num_bins, UntrustedStorageInterface& storage);
-    void obliviousBallsIntoBins();
+    std::vector<Block> createDummies(size_t count);
+    Block getRandomBlock();
+    void createReadMemory();
+    void blocksIntoBins();
+    void cleanWriteMemory();
+    void tightCompaction(size_t num_bins, LocalRAM& storage,vector<bool>& isDummy);
+    void binsTightCompaction(vector<bool>& isDummy);
+    void obliviousBlocksIntoBins();
     void cuckooHashBins();
     void moveSecretLoad();
-    void ballsIntoBins();
+    void blocksIntoBins();
+    void cuckooOverflow();
+    void addToStash(const std::vector<Block>& blocks);
+    void processblocksIntoBins(const std::vector<Block>& blocks);
+    void copyToEndOfBins(LocalRAM& second_data_ram, size_t reals);
+    void extract();
+    void obliviousBlocksIntoBinsExtract();
+    void intersperse();
 
     // 辅助方法
-    std::vector<Block> localTightCompaction(const std::vector<Block>& blocks);
-    void writeTransposed(std::unique_ptr<UntrustedStorageInterface>& ram,
-                         const std::vector<Block>& blocks, size_t offset);
-    std::vector<Block> readTransposed(std::unique_ptr<UntrustedStorageInterface>& ram,
-                                      size_t offset, size_t length);
+    std::vector<Block> localTightCompaction(const std::vector<Block>& blocks,
+                                            std::vector<bool>& isDummy);
 
     // 加密相关
     std::mt19937_64 rand_engine;
-    std::vector<uint8_t> generateRandomBlock();
 };
 
 

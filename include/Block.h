@@ -10,15 +10,14 @@ using namespace std;
 
 class Block {
 public:
-    static const int BLOCK_SIZE = 2;
-    int leaf_id;
-    int index;
-    int data[BLOCK_SIZE];
+    int key;
+    int data;
+    uint8_t state;
 
     Block();
-    Block(int leaf_id, int index, int data[]);
+    Block(int key, int data);
+    Block(int key, int data, uint8_t state);
     void printBlock();
     virtual ~Block();
 };
-
 #endif //PORAM_BLOCK_H
