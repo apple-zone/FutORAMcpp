@@ -7,10 +7,10 @@
 
 class LocalRAM {
 public:
-    int BLOCK_READ = 0;
-    int BLOCK_WRITE = 0;
-    int RT_READ = 0;
-    int RT_WRITE = 0;
+    static int BLOCK_READ;
+    static int BLOCK_WRITE;
+    static int RT_READ;
+    static int RT_WRITE;
     Config conf;
     std::vector<Block> memory; // 存储块的向量
     string location; // 存储位置
@@ -18,6 +18,10 @@ public:
     LocalRAM(const std::string& location, Config conf) : location(location), conf(conf) {
         memory.clear();
         memory.reserve(conf.DATA_SIZE); // 预留内存空间
+        BLOCK_READ = 0;
+        BLOCK_WRITE = 0;
+        RT_READ = 0;
+        RT_WRITE = 0;
     }
 
     Block readBlock(int location) {
@@ -44,7 +48,7 @@ public:
         std::copy(blocks.begin(), blocks.end(), chunkStart); // 写入指定范围的块
     }
 
-    std::vector<Block>readChunks(size_t start[], size-t end[] ,int size) {
+    std::vector<Block>readChunks(size_t start[], size_t end[] ,int size) {
         RT_READ += 1;
         std::vector<Block> result;
         for (int i = 0; i < size; ++i) {
@@ -64,17 +68,17 @@ public:
         }
     }
 
-    std::vector<Block> readBalls(size_t locations,size_t size)
+    std::vector<Block> readBlocks(size_t locations[],size_t size)
     {
         RT_READ += 1;
         std::vector<Block> result;
         for (int i = 0; i < size; ++i) {
-            result.push_back(memory[locations + i]);
+            result.push_back(memory[locations[i]]);
         }
         return result;
     }
 
-    void writeBalls(size_t locations[], const std::vector<Block>& blocks) {
+    void writeBlocks(size_t locations[], const std::vector<Block>& blocks) {
         RT_WRITE += 1;
         int size = blocks.size();
         for (size_t i = 0; i < size; ++i) {
@@ -104,7 +108,7 @@ public:
         }
     }
 
-    void reset_counters() {
+    static void reset_counters() {
         BLOCK_READ = 0;
         BLOCK_WRITE = 0;
         RT_READ = 0;

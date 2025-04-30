@@ -13,19 +13,21 @@
 class ByteOperations
 {
 public:
+    // 构造函数
+    ByteOperations();
     explicit ByteOperations(const std::vector<size_t> &key, const Config &config);
 
     // 位操作
     bool isBitOn(uint64_t number, size_t bit_num) const;
 
     // 容量球操作
-    uint32_t getCapacity(const std::vector<size_t> &capacity_ball) const;
+    size_t getCapacity( Block &capacity_ball) ;
     // std::vector<size_t> constructCapacityThresholdBall(uint32_t capacity, uint32_t threshold) const;
     // std::pair<uint32_t, uint32_t> deconstructCapacityThresholdBall(const std::vector<size_t> &ball) const;
 
     // 加密转换
-    uint64_t ballToPseudoRandomNumber(const Block &ball, uint64_t limit = UINT64_MAX) const;
-    uint64_t keyToPseudoRandomNumber(const size_t&key, uint64_t limit = UINT64_MAX) const;
+    size_t blockToPseudoRandomNumber(const Block &ball, int limit = UINT64_MAX) const;
+    size_t keyToPseudoRandomNumber(const size_t&key, int limit = -1) const;
 
     // 内存操作
     void writeTransposed(LocalRAM ram,vector<Block> blocks,size_t offset,size_t start) const;
@@ -38,7 +40,7 @@ public:
                                         size_t offset, size_t start,
                                         size_t read_length,
                                         size_t mixed_start, size_t mixed_end) const;
-    std::vector<std::vector<size_t>> readTransposedAndShifted(const std::vector<size_t> &ram,
+    std::vector<Block> readTransposedAndShifted( LocalRAM &ram,
                                                                size_t offset, size_t start,
                                                                size_t read_length,
                                                                size_t shift_position) const;
@@ -50,7 +52,9 @@ public:
         const std::vector<std::vector<size_t>> &balls, size_t status) const;
     std::vector<size_t> changeBallStatus(const std::vector<size_t> &ball, size_t status) const;
 
-    std::unordered_map<std::vector<size_t>, std::vector<Block>> ballsToDictionary(const std::vector<Block> &balls) const;
+    std::unordered_map<size_t,Block> blocksToDictionary(const std::vector<Block> &blocks) const;
+    Block constructCapacityThresholdBlock(size_t capacity, int threshold) const;
+    std::pair<size_t, int> deconstructCapacityThresholdBall(const Block &block) const;
 
 private:
     const Config &conf;

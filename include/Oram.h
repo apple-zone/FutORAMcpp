@@ -13,14 +13,13 @@
 
 class ORAM {
 public:
-    ORAM(int number_of_blocks);
+    ORAM(int number_of_blocks,string data_location);
     void cleanWriteMemory();
     void initialBuild(const std::string& data_location);
     Block access(const std::string& op, const Block& block);
     void rebuild();
 
 private:
-    size_t generateHashKey(const Block& block) const;
     void extractLevelOne();
     void tightCompactionLevelOne();
     void intersperseStashAndLevelOne();

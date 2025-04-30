@@ -13,7 +13,7 @@ private:
     std::mt19937 rng_;  // Mersenne Twister引擎
 
 public:
-    explicit ThresholdGenerator(const Config& conf) 
+    explicit ThresholdGenerator(const Config conf) 
         : conf_(conf), rng_(std::random_device{}()) {
         reset();
     }

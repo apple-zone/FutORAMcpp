@@ -8,6 +8,9 @@
 
 class ObliviousSort {
     public:
+
+        Config conf;
+        ByteOperations& byte_ops;
         ObliviousSort(const Config& config, ByteOperations& byte_ops)
             : conf(config), byte_ops(byte_ops) {}
     
@@ -36,7 +39,7 @@ class ObliviousSort {
             return {bin_0, bin_1};
         }
 
-        std:pair<vector<Block>,vector<Block>> splitToBinsByBitExtract(vector<Block>& blocks, size_t bit_num, size_t number_of_bins,float epsilon) {
+        std::pair<vector<Block>,vector<Block>> splitToBinsByBitExtract(vector<Block>& blocks, size_t bit_num, size_t number_of_bins,float epsilon) {
             vector<Block> bin_0, bin_1;
             for(auto block : blocks) {
                 if(block.state == 0) {
@@ -60,6 +63,6 @@ class ObliviousSort {
             }
             return {bin_0, bin_1};
         }
-}
+};
 
 #endif //FUTORAMCPP_OBLIVIOUSSORT_H

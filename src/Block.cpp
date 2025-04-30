@@ -14,8 +14,8 @@ Block::Block(){//dummy index
     this->state = 0;
 }
 
-Block::Block(int key, int data) : key(key), data(data),state(1){};
-Block::Block(int key, int data, uint8_t state) : key(key), data(data), state(state){};
+Block::Block(size_t key, int data) : key(key), data(data),state(1){};
+Block::Block(size_t key, int data, uint8_t state) : key(key), data(data), state(state){};
 
 Block::~Block()
 {

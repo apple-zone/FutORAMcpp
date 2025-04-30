@@ -3,25 +3,35 @@
 #include <stdexcept>
 #include "Block.h"
 
-ByteOperations::ByteOperations(const std::vector<size_t> &key, const Config &config)
-    : conf(config), key_(key)
-{
-
+ByteOperations::ByteOperations()
+    : conf(conf), key_()
+    {
+    // Initialize the AES key using the provided configuration
+    // AES_set_encrypt_key(key_.data(), 128, &aes_key_);
 }
 
-string ByteOperations::getRandomString(size_t key) 
-{
+// ByteOperations::ByteOperations( const Config &config)
+//     : conf(config)
+// {
+
+// }
+
+// string ByteOperations::getRandomString(size_t key) 
+// {
     
-}
+// }
 
 bool ByteOperations::isBitOn(uint64_t number, size_t bit_num) const
 {
     return (number & (1ULL << bit_num)) != 0;
 }
 
-uint32_t ByteOperations::getCapacity(const std::vector<size_t> &capacity_ball) const
+size_t ByteOperations::getCapacity(Block &capacity_ball) 
 {
-
+    if(capacity_ball.data != 0 || capacity_ball.state != 0)
+    {
+        throw std::invalid_argument("Invalid capacity ball state or key");
+    }else return capacity_ball.key;
 }
 
 // Block ByteOperations::constructCapacityThresholdBall(
@@ -36,8 +46,8 @@ uint32_t ByteOperations::getCapacity(const std::vector<size_t> &capacity_ball) c
 //     return std::pair<size_t, size_t>(block.data, block.key);
 // }
 
-size_t ByteOperations::ballToPseudoRandomNumber(
-    const Block &ball, uint64_t limit) const
+size_t ByteOperations::blockToPseudoRandomNumber(
+    const Block &ball, int limit) const
 {
     size_t ballkey = ball.key;
     return keyToPseudoRandomNumber(ballkey, limit);
@@ -75,7 +85,15 @@ size_t AES_EncryptSizeT(size_t input,
     return result;
 }
 
-size_t keyToPseudoRandomNumber(const size_t &key, int limit = -1) const {
+size_t ByteOperations::keyToPseudoRandomNumber(const size_t &key, int limit = -1) const
+{
+    // AES密钥
+    unsigned char aes_key[16] = {0}; // 128位密钥
+
+    // 将key转换为字节数组
+    memcpy(aes_key, &key, sizeof(key)); // 复制原始数据
+
+    return AES_EncryptSizeT(key, aes_key, limit);
 
 };
 
@@ -87,24 +105,24 @@ void ByteOperations::writeTransposed(LocalRAM ram, vector<Block> blocks, size_t 
         start_positions.push_back(start + i * offset);
         end_positions.push_back(start + i * offset + 1);
     }
-    ram.writeChunks(start_positions, end_positions, blocks);
+    ram.writeChunks(start_positions.data(), end_positions.data(), blocks);
 }
 
 std::vector<Block> ByteOperations::readTransposed(
     LocalRAM &ram, size_t offset, size_t start,
     size_t read_length) const
 {
-    vector<size_t> start, end;
+    vector<size_t> start_pos, end_pos;
     for (int i = 0; i < read_length; ++i)
     {
-        start.push_back(start + i * offset * conf.BALL_SIZE);
-        end.push_back(start + i * offset * conf.BALL_SIZE + conf.BALL_SIZE);
+        start_pos.push_back((start + i * offset * conf.BLOCK_SIZE));
+        end_pos.push_back(start + i * offset * conf.BLOCK_SIZE + conf.BLOCK_SIZE);
     }
-    return ram.readChunks(start, end, read_length);
+    return ram.readChunks(start_pos.data(), end_pos.data(), read_length);
 }
 
 std::vector<Block> ByteOperations::readTransposedAndShifted(
-    const LocalRAM &ram, size_t offset, size_t start,
+     LocalRAM &ram, size_t offset, size_t start,
     size_t read_length, size_t shift_position) const
 {
     std::pair<std::vector<size_t>, std::vector<size_t>> chunks;
@@ -117,7 +135,7 @@ std::vector<Block> ByteOperations::readTransposedAndShifted(
         chunks.second.push_back(start + i * offset + shift_position + 1);
     }
     std::vector<Block> result = ram.readChunks(chunks.first.data(), chunks.second.data(), read_length);
-    shift = sihft % result.size();
+    shift %= result.size();
     std::rotate(result.begin(), result.begin() + shift, result.end());
     return result;
 }
@@ -125,33 +143,45 @@ std::vector<Block> ByteOperations::readTransposedAndShifted(
 // 辅助方法实现
 size_t ByteOperations::calculateBallOffset(size_t index, size_t offset, size_t start) const
 {
-    return start + index * offset * conf.BALL_SIZE;
+    return start + index * offset * conf.BLOCK_SIZE;
 }
 
 void ByteOperations::validateBallSize(const std::vector<size_t> &ball) const
 {
-    if (ball.size() != conf.BALL_SIZE)
+    if (ball.size() != conf.BLOCK_SIZE)
     {
         throw std::invalid_argument("Invalid ball size: " +
                                     std::to_string(ball.size()) +
                                     " expected: " +
-                                    std::to_string(conf.BALL_SIZE));
+                                    std::to_string(conf.BLOCK_SIZE));
     }
 }
 
 size_t ByteOperations::calculateFieldSize() const
 {
-    return (conf.BALL_SIZE - conf.BALL_STATUS_POSITION) / 2;
+    return (conf.BLOCK_SIZE - conf.BLOCK_STATUS_POSITION) / 2;
 }
 
 
-std::unordered_map<std::vector<size_t>, std::vector<Block>> ByteOperations::ballsToDictionary(const std::vector<Block> &balls) const
+std::unordered_map<size_t,Block> ByteOperations::blocksToDictionary(const std::vector<Block> &balls) const
 {
-    std::unordered_map<std::vector<size_t>, std::vector<Block>> dictionary;
+    std::unordered_map<size_t,Block> dictionary;
     for (const auto &ball : balls)
     {
-        std::vector<size_t> key = {ball.key};
-        dictionary[key].push_back(ball);
+        size_t key = {ball.key};
+        dictionary[key]=ball;
     }
     return dictionary;
+}
+
+
+Block ByteOperations::constructCapacityThresholdBlock(size_t capacity, int threshold) const
+{
+    Block new_block = Block(capacity, threshold);
+    return new_block;
+}
+
+std::pair<size_t, int> ByteOperations::deconstructCapacityThresholdBall(const Block &block) const
+{
+    return std::pair<size_t, int>(block.key, block.data);
 }

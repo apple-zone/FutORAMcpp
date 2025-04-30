@@ -71,6 +71,13 @@
         "memory_resource": "cpp",
         "numeric": "cpp",
         "string_view": "cpp",
-        "numbers": "cpp"
-    }
+        "numbers": "cpp",
+        "chrono": "cpp",
+        "forward_list": "cpp",
+        "iomanip": "cpp",
+        "ratio": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
+    },
+    "cmake.sourceDirectory": "E:/Code/FutORAMcpp"
 }

@@ -10,13 +10,13 @@ using namespace std;
 
 class Block {
 public:
-    int key;
+    size_t key;
     int data;
     uint8_t state;
 
     Block();
-    Block(int key, int data);
-    Block(int key, int data, uint8_t state);
+    Block(size_t key, int data);
+    Block(size_t key, int data, uint8_t state);
     void printBlock();
     virtual ~Block();
 };
