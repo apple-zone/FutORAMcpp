@@ -4,7 +4,7 @@
       "name": "Win32",
       "includePath": [
         "${workspaceFolder}/**",
-        "D:/Environment/OpenSSL-Win64/include",
+        "D:/Environment/vcpkg/installed/x64-mingw-static/include",
         "${workspaceFolder}/include",
         "${workspaceFolder}/src"
       ],
