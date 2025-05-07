@@ -48,15 +48,6 @@ rule RERUN_CMAKE
 
 
 #############################################
-# Rule for re-checking globbed directories.
-
-rule VERIFY_GLOBS
-  command = D:\Environment\mingw64\bin\cmake.exe -P E:\Code\FutORAMcpp\build\CMakeFiles\VerifyGlobs.cmake
-  description = Re-checking globbed directories...
-  generator = 1
-
-
-#############################################
 # Rule for cleaning all built files.
 
 rule CLEAN

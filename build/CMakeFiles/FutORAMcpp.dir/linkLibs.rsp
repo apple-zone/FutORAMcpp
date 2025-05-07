@@ -1,0 +1,1 @@
+ "D:/Environment/vcpkg/installed/x64-mingw-static/lib/libssl.a" "D:/Environment/vcpkg/installed/x64-mingw-static/lib/libcrypto.a" -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 

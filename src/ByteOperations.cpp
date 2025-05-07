@@ -5,7 +5,7 @@
 
 ByteOperations::ByteOperations()
     : conf(conf), key_()
-    {
+{
     // Initialize the AES key using the provided configuration
     // AES_set_encrypt_key(key_.data(), 128, &aes_key_);
 }
@@ -16,9 +16,9 @@ ByteOperations::ByteOperations()
 
 // }
 
-// string ByteOperations::getRandomString(size_t key) 
+// string ByteOperations::getRandomString(size_t key)
 // {
-    
+
 // }
 
 bool ByteOperations::isBitOn(uint64_t number, size_t bit_num) const
@@ -26,12 +26,9 @@ bool ByteOperations::isBitOn(uint64_t number, size_t bit_num) const
     return (number & (1ULL << bit_num)) != 0;
 }
 
-size_t ByteOperations::getCapacity(Block &capacity_ball) 
+size_t ByteOperations::getCapacity(Block &capacity_ball)
 {
-    if(capacity_ball.data != 0 || capacity_ball.state != 0)
-    {
-        throw std::invalid_argument("Invalid capacity ball state or key");
-    }else return capacity_ball.key;
+    return capacity_ball.key;
 }
 
 // Block ByteOperations::constructCapacityThresholdBall(
@@ -55,7 +52,7 @@ size_t ByteOperations::blockToPseudoRandomNumber(
 
 size_t AES_EncryptSizeT(size_t input,
                         const unsigned char *key,
-                        int limit = -1)
+                        int limit)
 {
     // 初始化AES密钥结构体
     AES_KEY aes_key;
@@ -65,7 +62,7 @@ size_t AES_EncryptSizeT(size_t input,
     }
 
     // 转换size_t为字节数组
-    unsigned char plaintext[16] = {0};             // 初始化为全0
+    unsigned char plaintext[16] = {0};        // 初始化为全0
     memcpy(plaintext, &input, sizeof(input)); // 复制原始数据
 
     // 执行AES-128-ECB加密
@@ -85,7 +82,7 @@ size_t AES_EncryptSizeT(size_t input,
     return result;
 }
 
-size_t ByteOperations::keyToPseudoRandomNumber(const size_t &key, int limit = -1) const
+size_t ByteOperations::keyToPseudoRandomNumber(const size_t &key, int limit) const
 {
     // AES密钥
     unsigned char aes_key[16] = {0}; // 128位密钥
@@ -94,7 +91,6 @@ size_t ByteOperations::keyToPseudoRandomNumber(const size_t &key, int limit = -1
     memcpy(aes_key, &key, sizeof(key)); // 复制原始数据
 
     return AES_EncryptSizeT(key, aes_key, limit);
-
 };
 
 void ByteOperations::writeTransposed(LocalRAM ram, vector<Block> blocks, size_t offset, size_t start) const
@@ -105,7 +101,7 @@ void ByteOperations::writeTransposed(LocalRAM ram, vector<Block> blocks, size_t 
         start_positions.push_back(start + i * offset);
         end_positions.push_back(start + i * offset + 1);
     }
-    ram.writeChunks(start_positions.data(), end_positions.data(), blocks);
+    ram.writeChunks(start_positions.data(), end_positions.data(), blocks, blocks.size());
 }
 
 std::vector<Block> ByteOperations::readTransposed(
@@ -122,7 +118,7 @@ std::vector<Block> ByteOperations::readTransposed(
 }
 
 std::vector<Block> ByteOperations::readTransposedAndShifted(
-     LocalRAM &ram, size_t offset, size_t start,
+    LocalRAM &ram, size_t offset, size_t start,
     size_t read_length, size_t shift_position) const
 {
     std::pair<std::vector<size_t>, std::vector<size_t>> chunks;
@@ -162,18 +158,16 @@ size_t ByteOperations::calculateFieldSize() const
     return (conf.BLOCK_SIZE - conf.BLOCK_STATUS_POSITION) / 2;
 }
 
-
-std::unordered_map<size_t,Block> ByteOperations::blocksToDictionary(const std::vector<Block> &balls) const
+std::unordered_map<size_t, Block> ByteOperations::blocksToDictionary(const std::vector<Block> &balls) const
 {
-    std::unordered_map<size_t,Block> dictionary;
+    std::unordered_map<size_t, Block> dictionary;
     for (const auto &ball : balls)
     {
         size_t key = {ball.key};
-        dictionary[key]=ball;
+        dictionary[key] = ball;
     }
     return dictionary;
 }
-
 
 Block ByteOperations::constructCapacityThresholdBlock(size_t capacity, int threshold) const
 {

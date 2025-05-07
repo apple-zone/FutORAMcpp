@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cmake: configure",  // 首次配置时运行
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-B", "build",
+                "-DCMAKE_TOOLCHAIN_FILE=D:/Environment/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "-DOPENSSL_ROOT_DIR=D:/Environment/vcpkg/installed/x64-mingw-static",
+                "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${workspaceFolder}/build"  // 强制输出到 build 根目录
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "cmake: build",  // 日常编译
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build", "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "dependsOn": ["cmake: configure"]
+        }
+    ]
+}

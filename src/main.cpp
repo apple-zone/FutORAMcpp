@@ -1,5 +1,6 @@
-#include "tests.cpp"
-void main()
+#include "tests.h"
+
+int main()
 {
     // 测试代码
     real_oram_test();
@@ -10,7 +11,7 @@ void main()
     // testCuckooHash();
     // testObliviousSort();
     // testThresholdGenerator();
-    return;
+    system("pause"); // 暂停程序，等待用户输入
+    return 0;
 }
-
 

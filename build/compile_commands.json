@@ -1,0 +1,50 @@
+[
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\main.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\main.cpp",
+  "file": "E:/Code/FutORAMcpp/src/main.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/main.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\Block.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\Block.cpp",
+  "file": "E:/Code/FutORAMcpp/src/Block.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/Block.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\ByteOperations.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\ByteOperations.cpp",
+  "file": "E:/Code/FutORAMcpp/src/ByteOperations.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/ByteOperations.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\Hashtable.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\Hashtable.cpp",
+  "file": "E:/Code/FutORAMcpp/src/Hashtable.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/Hashtable.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\ORAM.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\ORAM.cpp",
+  "file": "E:/Code/FutORAMcpp/src/ORAM.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/ORAM.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\localRam.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\localRam.cpp",
+  "file": "E:/Code/FutORAMcpp/src/localRam.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/localRam.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\tests.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\tests.cpp",
+  "file": "E:/Code/FutORAMcpp/src/tests.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/tests.cpp.obj"
+},
+{
+  "directory": "E:/Code/FutORAMcpp/build",
+  "command": "D:\\Environment\\mingw64\\bin\\clang++.exe  @CMakeFiles/FutORAMcpp.dir/includes_CXX.rsp  -g -O0 -g -std=gnu++17 -o CMakeFiles\\FutORAMcpp.dir\\src\\Config.cpp.obj -c E:\\Code\\FutORAMcpp\\src\\Config.cpp",
+  "file": "E:/Code/FutORAMcpp/src/Config.cpp",
+  "output": "CMakeFiles/FutORAMcpp.dir/src/Config.cpp.obj"
+}
+]

@@ -6,6 +6,8 @@
 #define PORAM_BLOCK_H
 
 #include <algorithm>
+
+#include <cstdint>
 using namespace std;
 
 class Block {

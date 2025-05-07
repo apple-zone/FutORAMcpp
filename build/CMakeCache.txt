@@ -15,25 +15,28 @@
 ########################
 
 //Path to a program.
-CMAKE_ADDR2LINE:FILEPATH=D:/Environment/mingw64/bin/addr2line.exe
+CMAKE_ADDR2LINE:FILEPATH=D:/Environment/mingw64/bin/llvm-addr2line.exe
 
 //Path to a program.
-CMAKE_AR:FILEPATH=D:/Environment/mingw64/bin/ar.exe
+CMAKE_AR:FILEPATH=D:/Environment/mingw64/bin/llvm-ar.exe
 
-//Choose the type of build, options are: None Debug Release RelWithDebInfo
-// MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+//No help, variable specified on the command line.
+CMAKE_BUILD_TYPE:STRING=Debug
 
-//CXX compiler
-CMAKE_CXX_COMPILER:FILEPATH=D:/Environment/mingw64/bin/c++.exe
+//Enable/Disable color output during build.
+CMAKE_COLOR_MAKEFILE:BOOL=ON
 
-//A wrapper around 'ar' adding the appropriate '--plugin' option
-// for the GCC compiler
-CMAKE_CXX_COMPILER_AR:FILEPATH=D:/Environment/mingw64/bin/gcc-ar.exe
+//No help, variable specified on the command line.
+CMAKE_CXX_COMPILER:FILEPATH=D:/Environment/mingw64/bin/clang++.exe
 
-//A wrapper around 'ranlib' adding the appropriate '--plugin' option
-// for the GCC compiler
-CMAKE_CXX_COMPILER_RANLIB:FILEPATH=D:/Environment/mingw64/bin/gcc-ranlib.exe
+//LLVM archiver
+CMAKE_CXX_COMPILER_AR:FILEPATH=D:/Environment/mingw64/bin/llvm-ar.exe
+
+//`clang-scan-deps` dependency scanner
+CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=D:/Environment/mingw64/bin/clang-scan-deps.exe
+
+//Generate index for LLVM archive
+CMAKE_CXX_COMPILER_RANLIB:FILEPATH=D:/Environment/mingw64/bin/llvm-ranlib.exe
 
 //Flags used by the CXX compiler during all build types.
 CMAKE_CXX_FLAGS:STRING=
@@ -53,16 +56,17 @@ CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 //Libraries linked by default with all C++ applications.
 CMAKE_CXX_STANDARD_LIBRARIES:STRING=-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
 
-//C compiler
-CMAKE_C_COMPILER:FILEPATH=D:/Environment/mingw64/bin/gcc.exe
+//No help, variable specified on the command line.
+CMAKE_C_COMPILER:FILEPATH=D:/Environment/mingw64/bin/clang.exe
 
-//A wrapper around 'ar' adding the appropriate '--plugin' option
-// for the GCC compiler
-CMAKE_C_COMPILER_AR:FILEPATH=D:/Environment/mingw64/bin/gcc-ar.exe
+//LLVM archiver
+CMAKE_C_COMPILER_AR:FILEPATH=D:/Environment/mingw64/bin/llvm-ar.exe
 
-//A wrapper around 'ranlib' adding the appropriate '--plugin' option
-// for the GCC compiler
-CMAKE_C_COMPILER_RANLIB:FILEPATH=D:/Environment/mingw64/bin/gcc-ranlib.exe
+//`clang-scan-deps` dependency scanner
+CMAKE_C_COMPILER_CLANG_SCAN_DEPS:FILEPATH=D:/Environment/mingw64/bin/clang-scan-deps.exe
+
+//Generate index for LLVM archive
+CMAKE_C_COMPILER_RANLIB:FILEPATH=D:/Environment/mingw64/bin/llvm-ranlib.exe
 
 //Flags used by the C compiler during all build types.
 CMAKE_C_FLAGS:STRING=
@@ -83,7 +87,7 @@ CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 CMAKE_C_STANDARD_LIBRARIES:STRING=-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
 
 //Path to a program.
-CMAKE_DLLTOOL:FILEPATH=D:/Environment/mingw64/bin/dlltool.exe
+CMAKE_DLLTOOL:FILEPATH=D:/Environment/mingw64/bin/llvm-dlltool.exe
 
 //Flags used by the linker during all build types.
 CMAKE_EXE_LINKER_FLAGS:STRING=
@@ -100,8 +104,8 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 //Value Computed by CMake.
 CMAKE_FIND_PACKAGE_REDIRECTS_DIR:STATIC=E:/Code/FutORAMcpp/build/CMakeFiles/pkgRedirects
@@ -113,10 +117,10 @@ CMAKE_GNUtoMS:BOOL=OFF
 CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/FutORAMcpp
 
 //Path to a program.
-CMAKE_LINKER:FILEPATH=D:/Environment/mingw64/bin/ld.exe
+CMAKE_LINKER:FILEPATH=D:/Environment/mingw64/bin/ld.lld.exe
 
-//Program used to build from build.ninja files.
-CMAKE_MAKE_PROGRAM:FILEPATH=D:/Environment/mingw64/bin/ninja.exe
+//Path to a program.
+CMAKE_MAKE_PROGRAM:FILEPATH=D:/Environment/mingw64/bin/mingw32-make.exe
 
 //Flags used by the linker during the creation of modules during
 // all build types.
@@ -139,13 +143,13 @@ CMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_NM:FILEPATH=D:/Environment/mingw64/bin/nm.exe
+CMAKE_NM:FILEPATH=D:/Environment/mingw64/bin/llvm-nm.exe
 
 //Path to a program.
-CMAKE_OBJCOPY:FILEPATH=D:/Environment/mingw64/bin/objcopy.exe
+CMAKE_OBJCOPY:FILEPATH=D:/Environment/mingw64/bin/llvm-objcopy.exe
 
 //Path to a program.
-CMAKE_OBJDUMP:FILEPATH=D:/Environment/mingw64/bin/objdump.exe
+CMAKE_OBJDUMP:FILEPATH=D:/Environment/mingw64/bin/llvm-objdump.exe
 
 //Value Computed by CMake
 CMAKE_PROJECT_DESCRIPTION:STATIC=
@@ -157,7 +161,7 @@ CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 CMAKE_PROJECT_NAME:STATIC=FutORAMcpp
 
 //Path to a program.
-CMAKE_RANLIB:FILEPATH=D:/Environment/mingw64/bin/ranlib.exe
+CMAKE_RANLIB:FILEPATH=D:/Environment/mingw64/bin/llvm-ranlib.exe
 
 //RC compiler
 CMAKE_RC_COMPILER:FILEPATH=D:/Environment/mingw64/bin/windres.exe
@@ -178,7 +182,10 @@ CMAKE_RC_FLAGS_RELEASE:STRING=
 CMAKE_RC_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_READELF:FILEPATH=D:/Environment/mingw64/bin/readelf.exe
+CMAKE_READELF:FILEPATH=D:/Environment/mingw64/bin/llvm-readelf.exe
+
+//No help, variable specified on the command line.
+CMAKE_RUNTIME_OUTPUT_DIRECTORY:UNINITIALIZED=E:\Code\FutORAMcpp/build
 
 //Flags used by the linker during the creation of shared libraries
 // during all build types.
@@ -228,13 +235,13 @@ CMAKE_STATIC_LINKER_FLAGS_RELEASE:STRING=
 CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
 //Path to a program.
-CMAKE_STRIP:FILEPATH=D:/Environment/mingw64/bin/strip.exe
+CMAKE_STRIP:FILEPATH=D:/Environment/mingw64/bin/llvm-strip.exe
 
 //Path to a program.
 CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 
-//The CMake toolchain file
-CMAKE_TOOLCHAIN_FILE:FILEPATH=D:/Environment/vcpkg/scripts/buildsystems/vcpkg.cmake
+//No help, variable specified on the command line.
+CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=D:/Environment/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console
@@ -260,63 +267,8 @@ OPENSSL_INCLUDE_DIR:PATH=D:/Environment/vcpkg/installed/x64-mingw-static/include
 //No help, variable specified on the command line.
 OPENSSL_ROOT_DIR:UNINITIALIZED=D:/Environment/vcpkg/installed/x64-mingw-static
 
-//No help, variable specified on the command line.
-OPENSSL_USE_STATIC_LIBS:UNINITIALIZED=ON
-
 //Path to a library.
 SSL_EAY:FILEPATH=D:/Environment/vcpkg/installed/x64-mingw-static/lib/libssl.a
-
-//Automatically copy dependencies into the output directory for
-// executables.
-VCPKG_APPLOCAL_DEPS:BOOL=ON
-
-//The directory which contains the installed libraries for each
-// triplet
-VCPKG_INSTALLED_DIR:PATH=D:/Environment/vcpkg/installed
-
-//The path to the vcpkg manifest directory.
-VCPKG_MANIFEST_DIR:PATH=
-
-//Use manifest mode, as opposed to classic mode.
-VCPKG_MANIFEST_MODE:BOOL=OFF
-
-//Appends the vcpkg paths to CMAKE_PREFIX_PATH, CMAKE_LIBRARY_PATH
-// and CMAKE_FIND_ROOT_PATH so that vcpkg libraries/packages are
-// found after toolchain/system libraries/packages.
-VCPKG_PREFER_SYSTEM_LIBS:BOOL=OFF
-
-//Enable the setup of CMAKE_PROGRAM_PATH to vcpkg paths
-VCPKG_SETUP_CMAKE_PROGRAM_PATH:BOOL=ON
-
-//Vcpkg target triplet (ex. x86-windows)
-VCPKG_TARGET_TRIPLET:STRING=x64-windows
-
-//Trace calls to find_package()
-VCPKG_TRACE_FIND_PACKAGE:BOOL=OFF
-
-//Enables messages from the VCPKG toolchain for debugging purposes.
-VCPKG_VERBOSE:BOOL=OFF
-
-//(experimental) Automatically copy dependencies into the install
-// target directory for executables. Requires CMake 3.14.
-X_VCPKG_APPLOCAL_DEPS_INSTALL:BOOL=OFF
-
-//(experimental) Add USES_TERMINAL to VCPKG_APPLOCAL_DEPS to force
-// serialization.
-X_VCPKG_APPLOCAL_DEPS_SERIALIZED:BOOL=OFF
-
-//Path to a program.
-Z_VCPKG_BUILTIN_POWERSHELL_PATH:FILEPATH=C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
-
-//Path to a program.
-Z_VCPKG_CL:FILEPATH=Z_VCPKG_CL-NOTFOUND
-
-//Path to a program.
-Z_VCPKG_PWSH_PATH:FILEPATH=Z_VCPKG_PWSH_PATH-NOTFOUND
-
-//The directory which contains the installed libraries for each
-// triplet
-_VCPKG_INSTALLED_DIR:PATH=D:/Environment/vcpkg/installed
 
 
 ########################
@@ -335,6 +287,8 @@ CMAKE_CACHE_MAJOR_VERSION:INTERNAL=3
 CMAKE_CACHE_MINOR_VERSION:INTERNAL=30
 //Patch version of cmake used to create the current loaded cache
 CMAKE_CACHE_PATCH_VERSION:INTERNAL=4
+//ADVANCED property for variable: CMAKE_COLOR_MAKEFILE
+CMAKE_COLOR_MAKEFILE-ADVANCED:INTERNAL=1
 //Path to CMake executable.
 CMAKE_COMMAND:INTERNAL=D:/Environment/mingw64/bin/cmake.exe
 //Path to cpack program executable.
@@ -345,6 +299,8 @@ CMAKE_CTEST_COMMAND:INTERNAL=D:/Environment/mingw64/bin/ctest.exe
 CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_COMPILER_AR
 CMAKE_CXX_COMPILER_AR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS
+CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_COMPILER_RANLIB
 CMAKE_CXX_COMPILER_RANLIB-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_CXX_FLAGS
@@ -363,6 +319,8 @@ CMAKE_CXX_STANDARD_LIBRARIES-ADVANCED:INTERNAL=1
 CMAKE_C_COMPILER-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_COMPILER_AR
 CMAKE_C_COMPILER_AR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_C_COMPILER_CLANG_SCAN_DEPS
+CMAKE_C_COMPILER_CLANG_SCAN_DEPS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_COMPILER_RANLIB
 CMAKE_C_COMPILER_RANLIB-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_FLAGS
@@ -391,12 +349,10 @@ CMAKE_EXE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_EXE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_EXPORT_COMPILE_COMMANDS
-CMAKE_EXPORT_COMPILE_COMMANDS-ADVANCED:INTERNAL=1
 //Name of external makefile project generator.
 CMAKE_EXTRA_GENERATOR:INTERNAL=
 //Name of generator.
-CMAKE_GENERATOR:INTERNAL=Ninja
+CMAKE_GENERATOR:INTERNAL=MinGW Makefiles
 //Generator instance identifier.
 CMAKE_GENERATOR_INSTANCE:INTERNAL=
 //Name of generator platform.
@@ -477,8 +433,6 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 CMAKE_STRIP-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_TAPI
 CMAKE_TAPI-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_TOOLCHAIN_FILE
-CMAKE_TOOLCHAIN_FILE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding OpenSSL
@@ -489,20 +443,6 @@ LIB_EAY-ADVANCED:INTERNAL=1
 OPENSSL_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: SSL_EAY
 SSL_EAY-ADVANCED:INTERNAL=1
-//Install the dependencies listed in your manifest:
-//\n    If this is off, you will have to manually install your dependencies.
-//\n    See https://github.com/microsoft/vcpkg/tree/master/docs/specifications/manifests.md
-// for more info.
-//\n
-VCPKG_MANIFEST_INSTALL:INTERNAL=OFF
-//ADVANCED property for variable: VCPKG_VERBOSE
-VCPKG_VERBOSE-ADVANCED:INTERNAL=1
-//Making sure VCPKG_MANIFEST_MODE doesn't change
-Z_VCPKG_CHECK_MANIFEST_MODE:INTERNAL=OFF
-//The path to the PowerShell implementation to use.
-Z_VCPKG_POWERSHELL_PATH:INTERNAL=C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe
-//Vcpkg root directory
-Z_VCPKG_ROOT_DIR:INTERNAL=D:/Environment/vcpkg
 //linker supports push/pop state
-_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
+_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=FALSE
 

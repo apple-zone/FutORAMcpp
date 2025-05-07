@@ -10,7 +10,6 @@
 #include <memory>
 #include <random>
 #include "Block.h"
-#include "UntrustedStorageInterface.h"
 #include "ByteOperations.h"
 #include "Config.h"
 #include "localRam.h"
@@ -21,10 +20,9 @@
 class HashTable
 {
 public:
-    HashTable();
+    HashTable(Config conf);
     void rebuild(size_t reals);
     Block lookup(size_t key);
-    void extract();
     // 配置和组件
     Config conf;
     bool is_built = false;
@@ -40,10 +38,9 @@ public:
     std::vector<Block> createDummies(size_t count);
     Block getRandomBlock();
     void createReadMemory();
-    void blocksIntoBins();
     void cleanWriteMemory();
     void emptyData();
-    void tightCompaction(size_t num_bins, LocalRAM &storage, vector<uint8_t> &states);
+    void tightCompaction(size_t num_bins, LocalRAM &storage, vector<uint8_t> *states = nullptr);
     void _tightCompaction(size_t start_loc, LocalRAM &storage, size_t offset, vector<uint8_t> &states);
     void randCyclicShift(int NUMBER_OFBINS, size_t start_loc, LocalRAM &storage);
     void binsTightCompaction(vector<uint8_t> &states);
@@ -52,9 +49,9 @@ public:
     void moveSecretLoad();
     vector<Block> _moveSecretLoad(vector<size_t> &bins_capacity, vector<vector<Block>> &bins_tops, size_t iteration_num, std::pair<vector<size_t>, vector<size_t>> &chunks);
     void blocksIntoBins();
+    void _blocksIntoBins(const std::vector<Block> &blocks);
     void cuckooOverflow();
     void addToStash(const std::vector<Block> &blocks);
-    void _blocksIntoBins(const std::vector<Block> &blocks);
     void copyToEndOfBins(LocalRAM &second_data_ram, size_t reals);
     void extract();
     void obliviousBlocksIntoBinsExtract();
@@ -68,8 +65,7 @@ public:
 
 private:
     // 临时存储
-    std::unordered_map<size_t, Block> local_stash;
-    std::vector<Block> dummy_blocks = std::vector<Block>(conf.BIN_SIZE, Block(-1, -1, false));
+    std::vector<Block> dummy_blocks = std::vector<Block>(conf.BIN_SIZE, Block(0,0,0));
 
     // 核心方法
 

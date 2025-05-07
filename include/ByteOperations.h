@@ -26,7 +26,7 @@ public:
     // std::pair<uint32_t, uint32_t> deconstructCapacityThresholdBall(const std::vector<size_t> &ball) const;
 
     // 加密转换
-    size_t blockToPseudoRandomNumber(const Block &ball, int limit = UINT64_MAX) const;
+    size_t blockToPseudoRandomNumber(const Block &ball, int limit = -1) const;
     size_t keyToPseudoRandomNumber(const size_t&key, int limit = -1) const;
 
     // 内存操作

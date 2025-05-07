@@ -2,7 +2,6 @@
 #define CUCKOOHASH_H
 #include <vector>
 #include "Block.h"
-#include "UntrustedStorageInterface.h"
 #include "ByteOperations.h"
 #include "config.h"
 #include <random>
@@ -18,7 +17,7 @@ private:
     std::vector<Block> stash;
 
 public:
-    CuckooHash(){
+    CuckooHash():conf(0), table1_byte_operation(), table2_byte_operation() {
         Block dummy = Block();
         table1 = std::vector<Block>(conf.MU, dummy);
         table2 = std::vector<Block>(conf.MU, dummy);

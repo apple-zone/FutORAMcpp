@@ -1,3 +1,4 @@
+
 #ifndef ORAM_H
 #define ORAM_H
 
@@ -37,3 +38,5 @@ private:
     std::mt19937_64 rng; // 使用64位随机引擎
 };
 #endif // ORAM_H
+
+

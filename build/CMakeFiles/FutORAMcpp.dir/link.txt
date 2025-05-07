@@ -1,0 +1,3 @@
+D:\Environment\mingw64\bin\cmake.exe -E rm -f CMakeFiles\FutORAMcpp.dir/objects.a
+D:\Environment\mingw64\bin\llvm-ar.exe qc CMakeFiles\FutORAMcpp.dir/objects.a @CMakeFiles\FutORAMcpp.dir\objects1.rsp
+D:\Environment\mingw64\bin\clang++.exe  -g -O0 -g -Wl,--whole-archive CMakeFiles\FutORAMcpp.dir/objects.a -Wl,--no-whole-archive -o FutORAMcpp.exe -Wl,--out-implib,libFutORAMcpp.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\FutORAMcpp.dir\linkLibs.rsp

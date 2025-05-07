@@ -4,7 +4,7 @@
 #include "HashTable.h"
 #include <algorithm>
 
-HashTable::HashTable()
+HashTable::HashTable(Config conf)
     : conf(conf), byte_ops(), data_ram(conf.DATA_LOCATION, conf),
       bins_ram(conf.BINS_LOCATION, conf), overflow_ram(conf.OVERFLOW_LOCATION, conf),
       second_overflow_ram(conf.OVERFLOW_SECOND_LOCATION, conf), cuckoo(), threshold_generator(conf)
@@ -38,21 +38,20 @@ void HashTable::createReadMemory()
     for (i = 0; i < conf.N; i += conf.BIN_SIZE)
     {
         // 生成随机块并写入bins_ram
-        vector<Block> random_bin;
         std::pair<vector<size_t>, vector<size_t>> chunks;
         chunks.first.push_back(i), chunks.second.push_back(i + conf.BIN_SIZE);
+        vector<Block> random_bin;
         for (int j = 0; j < conf.BIN_SIZE; ++j)
         {
             random_bin.push_back(getRandomBlock());
         }
-        data_ram.writeChunks(chunks.first.data(), chunks.second.data(), random_bin);
+        data_ram.writeChunks(chunks.first.data(), chunks.second.data(), random_bin, chunks.first.size());
     }
-    for (; i < conf.N; i += conf.BIN_SIZE)
+    for (; i < 2 * conf.N; i += conf.BIN_SIZE)
     {
-        vector<Block> random_bin = createDummies(conf.BIN_SIZE);
         std::pair<vector<size_t>, vector<size_t>> chunks;
         chunks.first.push_back(i), chunks.second.push_back(i + conf.BIN_SIZE);
-        bins_ram.writeChunks(chunks.first.data(), chunks.second.data(), random_bin);
+        bins_ram.writeChunks(chunks.first.data(), chunks.second.data(), createDummies(conf.BIN_SIZE), chunks.first.size());
     }
 }
 
@@ -62,20 +61,32 @@ void HashTable::cleanWriteMemory()
     std::pair<vector<size_t>, vector<size_t>> chunks;
 
     // 清理bins_ram中的数据
-    for (size_t i = 0; i < conf.NUMBER_OF_BINS; ++i)
+    // printf("N:%d\n", conf.N);
+    // printf("BIN_SIZE:%d\n", conf.BIN_SIZE);
+    // printf("NUMBER_OF_BINS:%d\n", conf.NUMBER_OF_BINS);
+    size_t i = 0;
+    for (i = 0; i < conf.N * 2; i += conf.BIN_SIZE)
     {
-        chunks.first.push_back(i * conf.BIN_SIZE);
-        chunks.second.push_back((i + 1) * conf.BIN_SIZE);
-        bins_ram.writeChunks(chunks.first.data(), chunks.second.data(), createDummies(conf.BIN_SIZE));
+        chunks.first.push_back(i);
+        chunks.second.push_back(i + conf.BIN_SIZE);
+        // // 生成虚拟块并写入bins_ram
+        // vector<vector<Block>> dummy_bin;
+        // dummy_bin.push_back(createDummies(conf.BIN_SIZE));
+
+        bins_ram.writeChunks(chunks.first.data(), chunks.second.data(), createDummies(conf.BIN_SIZE), chunks.first.size());
         chunks.first.clear(), chunks.second.clear();
     }
     // 清理overflow_ram中的数据
-    int FINAL_OVERFLOW_SIZE = pow(2, log2(conf.NUMBER_OF_BINS_IN_OVERFLOW + conf.LOG_LAMBDA * conf.NUMBER_OF_BINS));
-    for (size_t i = 0; i < conf.NUMBER_OF_BINS_IN_OVERFLOW; ++i)
+    int FINAL_OVERFLOW_SIZE = pow(2, log2(conf.N * conf.EPSILON + conf.LOG_LAMBDA * conf.NUMBER_OF_BINS));
+    for (size_t i = 0; i < FINAL_OVERFLOW_SIZE; i += conf.BIN_SIZE)
+
     {
-        chunks.first.push_back(i * conf.BIN_SIZE);
-        chunks.second.push_back((i + 1) * conf.BIN_SIZE);
-        overflow_ram.writeChunks(chunks.first.data(), chunks.second.data(), createDummies(conf.BIN_SIZE));
+        chunks.first.push_back(i);
+        chunks.second.push_back(i + conf.BIN_SIZE);
+        // 生成虚拟块并写入bins_ram
+        // vector<vector<Block>> dummy_bin;
+        // dummy_bin.push_back(createDummies(conf.BIN_SIZE));
+        overflow_ram.writeChunks(chunks.first.data(), chunks.second.data(), createDummies(conf.BIN_SIZE), chunks.first.size());
         chunks.first.clear(), chunks.second.clear();
     }
 }
@@ -85,15 +96,20 @@ void HashTable::emptyData()
     for (int i = 0; i < conf.N; i += conf.BIN_SIZE)
 
     {
-        vector<Block> dummy_bin = createDummies(conf.BIN_SIZE);
+        // vector<vector<Block>> dummy_bin ;
+        // dummy_bin.push_back(createDummies(conf.BIN_SIZE));
         std::pair<vector<size_t>, vector<size_t>> chunks;
         chunks.first.push_back(i), chunks.second.push_back(i + conf.BIN_SIZE);
-        data_ram.writeChunks(chunks.first.data(), chunks.second.data(), dummy_bin);
+        data_ram.writeChunks(chunks.first.data(), chunks.second.data(), createDummies(conf.BIN_SIZE), chunks.first.size());
     }
 }
 
 void HashTable::rebuild(size_t reals)
 {
+    // for(Block block:data_ram.memory)
+    // {
+    //     printf("rebuild: key: %zu, data: %d\n", block.key, block.data);
+    // }
     local_stash.clear();
     blocksIntoBins();
     moveSecretLoad();
@@ -107,7 +123,7 @@ void HashTable::rebuild(size_t reals)
 Block HashTable::lookup(size_t key)
 {
     Block block = local_stash[key];
-    Block result = Block(-1, -1, 0); // 默认返回一个虚拟块
+    Block result = Block(0, 0, 0); // 默认返回一个虚拟块
     if (block.state == 1)
     {
         result = block;
@@ -207,15 +223,20 @@ Block HashTable::lookup(size_t key)
     return result;
 }
 
-// 核心方法实现
-void HashTable::tightCompaction(size_t num_bins, LocalRAM &storage, vector<uint8_t> &states = {})
+void HashTable::binsTightCompaction(vector<uint8_t> &states)
 {
-    if (states.size() == 0)
+    tightCompaction(conf.NUMBER_OF_BINS, bins_ram, &states);
+}
+
+// 核心方法实现
+void HashTable::tightCompaction(size_t num_bins, LocalRAM &storage, vector<uint8_t> *states)
+{
+    if (states->size() == 0)
     {
-        states.resize(num_bins, 0);
+        states->push_back(0);
     }
     size_t offset = conf.NUMBER_OF_BINS;
-    int distance = 1;
+    float distance = 1;
     int midLocation = int(conf.EPSILON * conf.N);
     int iteration = 1;
     while (offset >= 1)
@@ -225,10 +246,10 @@ void HashTable::tightCompaction(size_t num_bins, LocalRAM &storage, vector<uint8
         {
             randCyclicShift(num_bins, start_loc, storage);
         }
-        _tightCompaction(start_loc, storage, offset, states);
+        _tightCompaction(start_loc, storage, offset, *states);
 
         offset = int(offset / 2);
-        distance = int(distance / 2);
+        distance = (distance / 2);
         iteration++;
     }
 }
@@ -255,7 +276,7 @@ void HashTable::randCyclicShift(int NUMBER_OF_BINS, size_t start_loc, LocalRAM &
             {
                 int shift_amount = shift_amounts[i];
                 int end_index = start_index + NUMBER_OF_BINS;
-                vector<Block> blocks_to_shift(blocks.begin() + start_index, blocks.end() + end_index);
+                vector<Block> blocks_to_shift(blocks.begin() + start_index, blocks.begin() + end_index);
                 std::rotate(blocks_to_shift.begin(), blocks_to_shift.begin() + shift_amount, blocks_to_shift.end());
                 shifted_blocks.insert(shifted_blocks.end(), blocks_to_shift.begin(), blocks_to_shift.end());
                 start_index = end_index;
@@ -279,6 +300,29 @@ void HashTable::_tightCompaction(size_t start_loc, LocalRAM &storage, size_t off
         byte_ops.writeTransposed(storage, blocks, offset, start_loc + i);
     }
 }
+// 辅助方法
+std::vector<Block> HashTable::localTightCompaction(const std::vector<Block> &blocks,
+                                                   std::vector<uint8_t> &states)
+{
+    std::vector<Block> dummy, result;
+    for (auto block : blocks)
+    {
+        bool is_dummy = false;
+        for(size_t state : states)
+        {
+            if (block.state == state)
+            {
+                dummy.push_back(block);
+                is_dummy = true;
+                break;
+            }
+        }
+        if(!is_dummy) result.push_back(block);
+
+    }
+    result.insert(result.end(), dummy.begin(), dummy.end());
+    return result;
+}
 
 void HashTable::moveSecretLoad()
 {
@@ -291,14 +335,14 @@ void HashTable::moveSecretLoad()
         vector<size_t> start, end;
         for (int i = 0; i < num; i++)
         {
-            start.push_back(i * conf.BIN_SIZE);
-            end.push_back(i * conf.BIN_SIZE + 1);
+            start.push_back((current_bin+ i) * conf.BIN_SIZE);
+            end.push_back((current_bin+i) * conf.BIN_SIZE + 1);
         }
         vector<Block> bins = bins_ram.readChunks(start.data(), end.data(), num);
         vector<size_t> bins_capacity;
         for (int i = 0; i < bins.size(); i++)
         {
-            bins_capacity.push_back(bins[i].data); // 这里体现出完全不同的地方 这里不能直接使用python中的字符转换 希望不会出事
+            bins_capacity.push_back(bins[i].key); // 这里体现出完全不同的地方 这里不能直接使用python中的字符转换 希望不会出事
         }
         start.clear();
         end.clear();
@@ -306,7 +350,7 @@ void HashTable::moveSecretLoad()
         {
 
             size_t bin_num = i + current_bin;
-            size_t end_of_bin = bin_num * conf.BIN_SIZE + bins_capacity[i];
+            size_t end_of_bin = bin_num * conf.BIN_SIZE + bins_capacity[i]+1;
             size_t end_of_bin_minus_epsilon = end_of_bin - int(2 * conf.MU * conf.EPSILON);
             start.push_back(end_of_bin_minus_epsilon);
             end.push_back(end_of_bin);
@@ -318,15 +362,29 @@ void HashTable::moveSecretLoad()
             vector<Block> bin_top(blocks.begin() + i, blocks.begin() + i + int(2 * conf.MU * conf.EPSILON));
             bins_tops.push_back(bin_top);
         }
-
-        vector<Block> capacity_threshold_blocks = _moveSecretLoad(bins_capacity, bins_tops, iteration_num, {start, end});
+        auto chunks = std::make_pair(start, end);
+        vector<Block> capacity_threshold_blocks = _moveSecretLoad(bins_capacity, bins_tops, iteration_num, chunks);
+        iteration_num++;
+        current_bin += num;
+        std::pair<vector<size_t>,vector<size_t>> capacity_threshold_chunks;
+        capacity_threshold_chunks.first.assign(start.begin(), start.begin() + capacity_threshold_blocks.size());
+        capacity_threshold_chunks.second.assign(end.begin(), end.begin() + capacity_threshold_blocks.size());
+        bins_ram.writeChunks(capacity_threshold_chunks.first.data(),capacity_threshold_chunks.second.data(), capacity_threshold_blocks, capacity_threshold_blocks.size());
     }
 }
 
 vector<Block> HashTable::_moveSecretLoad(vector<size_t> &bins_capacity, vector<vector<Block>> &bins_tops, size_t iteration_num, std::pair<vector<size_t>, vector<size_t>> &chunks)
 {
-    vector<Block> write_blocks, write_back_blocks, capacity_threshold_blocks;
+    vector<Block> write_blocks, capacity_threshold_blocks, write_back_blocks;
     size_t count = 0;
+    // for(Block block:this->bins_ram.memory)
+    // {
+    //     if(block.state==1)
+    //     {
+    //         printf("_move: key: %zu ,data: %d\n", block.key,block.data);
+    //     }
+    // }
+    printf("\n");
     for (int i = 0; i < bins_capacity.size(); i++)
     {
         // 用于跳跃不存在的bins
@@ -336,18 +394,19 @@ vector<Block> HashTable::_moveSecretLoad(vector<size_t> &bins_capacity, vector<v
         int threshold = threshold_generator.generate();
         while (threshold >= bins_capacity[i])
         {
-            exception("Threshold is larger than capacity of bin.");
+            printf("Threshold is larger than capacity of bin.");
         }
-
+        size_t loc = bins_capacity[i] - threshold;
         // 将threshold后面的bins写入到write_blocks中
-        vector<Block> sub_bins(bins_tops[i].end() - threshold, bins_tops[i].end());
+        vector<Block> sub_bins(bins_tops[i].end()-loc ,bins_tops[i].end() );
         write_blocks.insert(write_blocks.end(), sub_bins.begin(), sub_bins.end());
         count++;
 
         // 只把threshold前面的bins写入到write_back_blocks中
-        vector<Block> sub_bins_2(bins_tops[i].begin(), bins_tops[i].begin() + threshold);
+        vector<Block> sub_bins_2(bins_tops[i].begin(), bins_tops[i].end() - loc);
         vector<Block> dummy_blocks = createDummies(bins_tops[i].size() - sub_bins_2.size());
         sub_bins_2.insert(sub_bins_2.end(), dummy_blocks.begin(), dummy_blocks.end());
+
         write_back_blocks.insert(write_back_blocks.end(), sub_bins_2.begin(), sub_bins_2.end());
         capacity_threshold_blocks.push_back(byte_ops.constructCapacityThresholdBlock(bins_capacity[i], threshold));
     }
@@ -356,13 +415,160 @@ vector<Block> HashTable::_moveSecretLoad(vector<size_t> &bins_capacity, vector<v
     write_blocks.insert(write_blocks.end(), dummy_blocks.begin(), dummy_blocks.end());
     // 写入转换过的overflow（以便后续的紧确压缩
     byte_ops.writeTransposed(bins_ram, write_blocks, conf.NUMBER_OF_BINS_IN_OVERFLOW, iteration_num);
-    bins_ram.writeChunks(chunks.first.data(), chunks.second.data(), write_back_blocks);
+
+    vector<size_t> start(chunks.first.begin(), chunks.first.begin() + count), end(chunks.second.begin(), chunks.second.begin() + count);
+
+    bins_ram.writeChunks(start.data(), end.data(), write_back_blocks, start.size());
     return capacity_threshold_blocks;
 }
-
-void HashTable::binsTightCompaction(vector<uint8_t> &states)
+void HashTable::blocksIntoBins()
 {
-    tightCompaction(conf.NUMBER_OF_BINS, bins_ram, states);
+    std::vector<Block> blocks;
+
+    // for(Block block:data_ram.memory)
+    // {
+    //     printf("data_ram: key: %zu, data: %d\n", block.key, block.data);
+    // }
+
+    if (conf.FINAL)
+    {
+        std::swap(data_ram, bins_ram);
+    }
+
+    // for(Block block:bins_ram.memory)
+    // {
+    //     printf("bins_ram: key: %zu, data: %d\n", block.key, block.data);
+    // }
+
+    for (size_t i = 0; i < bins_ram.getSize(); i+=conf.BIN_SIZE)
+    {
+        std::pair<vector<size_t>, vector<size_t>> chunks;
+        chunks.first.push_back(i), chunks.second.push_back(i + conf.BIN_SIZE);
+        // 读取bin
+        blocks = data_ram.readChunks(chunks.first.data(), chunks.second.data(), chunks.first.size());
+        // for(Block block : blocks)
+        // {
+        //     if (block.state == 1)
+        //     {
+        //         printf("key: %zu ,data: %d\n", block.key, block.data);
+        //     }
+        // }
+        printf("blocks_into_bins:  %d\n", blocks.size());
+        _blocksIntoBins(blocks);
+    }
+
+    conf.reset();
+}
+
+void HashTable::_blocksIntoBins(const std::vector<Block> &blocks)
+{
+    std::unordered_map<size_t, std::vector<Block>> bin_map;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<size_t> dist(0, conf.NUMBER_OF_BINS - 1);
+
+    // printf("blocks number: %zu\n", blocks.size());
+    // 分桶逻辑
+    for (const auto &block : blocks)
+    {
+        size_t target_bin;
+        // 这里随机分桶的逻辑可能要改
+        if (block.state == 0)
+        {
+            target_bin = dist(gen)%conf.NUMBER_OF_BINS; // 随机分桶
+            bin_map[target_bin].push_back(Block(0, 0, 0));
+        }
+        else
+        {
+            target_bin = byte_ops.blockToPseudoRandomNumber(block, conf.NUMBER_OF_BINS);
+            bin_map[target_bin].push_back(block);
+        }
+
+    }
+
+    // size_t total = 0;
+    // for (const auto& pair : bin_map) {
+    //     total += pair.second.size(); // pair.second 是 std::vector<Block>
+    // }
+    // printf("total: %zu\n", total);
+
+    // 准备写入操作
+
+    // 提取键值
+    vector<std::pair<size_t, Block>> bins_capacity;
+
+    for (auto bin_num : bin_map)
+    {
+        bins_capacity.push_back({bin_num.first, bins_ram.readBlock(bin_num.first*conf.BIN_SIZE)});
+    }
+    std::pair<vector<size_t>, vector<size_t>> write_chunks;
+    std::vector<Block> write_blocks;
+
+    size_t count_new = 0;
+    for(Block block:this->bins_ram.memory)
+    {
+        if(block.state==1)
+        {
+            printf("before: key: %zu ,data: %d\n", block.key,block.data);
+        }
+    }
+    for (auto [bin_num, cpacity_block] : bins_capacity)
+    {
+        for(Block block:this->bins_ram.memory)
+        {
+            if(block.state==1)
+            {
+                printf("start: key: %zu ,data: %d\n", block.key,block.data);
+            }
+        }
+
+        size_t capacity = byte_ops.getCapacity(cpacity_block);
+        printf("bin_num: %zu\n, capacity: %zu\n", bin_num, capacity);   
+        // 容量检查
+        if (capacity >= 2 * conf.MU - 1)
+        {
+            throw std::runtime_error("Bin " + std::to_string(bin_num) + " overflow");
+        }
+
+        // 以block为单位的BIN地址
+        // 这里bin_loc到bin_write_loc中间的capacity和1分别代表原来的blocks和新加的capacity_block
+        size_t bin_loc = bin_num * conf.BIN_SIZE;
+        size_t bin_writer_loc = bin_loc + capacity + 1;
+        vector<Block> new_blocks = bin_map[bin_num];
+
+        // count_new += new_blocks.size();
+        // 已经验证这里的new_capacity数量没错
+        // 更新容量
+        printf("capacity: %zu, new capacity: %zu\n",capacity, capacity + new_blocks.size());
+        Block new_capacity_block = Block(capacity + new_blocks.size(), 0, 1);
+        write_chunks.first.push_back(bin_loc),
+            write_chunks.second.push_back(bin_loc + 1);
+        write_blocks.push_back(new_capacity_block);
+
+        // balls into bin
+        write_chunks.first.push_back(bin_writer_loc),
+            write_chunks.second.push_back(bin_writer_loc + new_blocks.size());
+        // 这里的blocks是两个bin的拼接
+        write_blocks.insert(write_blocks.end(), new_blocks.begin(), new_blocks.end());
+    }
+    // printf("count_new: %zu\n", count_new);
+    this->bins_ram.writeChunks(write_chunks.first.data(), write_chunks.second.data(), write_blocks, write_chunks.first.size());
+    // for(Block block:write_blocks)
+    // {
+    //     if(block.state==1)
+    //     {
+    //         printf("key: %zu ,data: %d\n", block.key,block.data);
+    //     }
+    // }
+    // 这里write_blocks的结构是每个bin的容量块 然后数据块
+    for(Block block:this->bins_ram.memory)
+    {
+        if(block.state==1)
+        {
+            printf("btob: key: %zu ,data: %d\n", block.key,block.data);
+        }
+    }
+    printf("\n");
 }
 
 void HashTable::obliviousBlocksIntoBins()
@@ -380,7 +586,7 @@ void HashTable::obliviousBlocksIntoBins()
         for (int bin_index = 0; bin_index < conf.NUMBER_OF_BINS_IN_OVERFLOW / 2; bin_index++)
         {
             std::pair<vector<size_t>, vector<size_t>> chunks;
-            chunks.first.push_back(first_bin_index*conf.BIN_SIZE),chunks.second.push_back(first_bin_index*conf.BIN_SIZE + conf.BIN_SIZE);
+            chunks.first.push_back(first_bin_index * conf.BIN_SIZE), chunks.second.push_back(first_bin_index * conf.BIN_SIZE + conf.BIN_SIZE);
             vector<Block> first_bin = current_ram.readChunks(chunks.first.data(), chunks.second.data(), chunks.first.size());
             chunks.first.clear(), chunks.second.clear();
             chunks.first.push_back((first_bin_index + 1 << bit_num) * conf.BIN_SIZE), chunks.second.push_back((first_bin_index + 1 << bit_num + 1) * conf.BIN_SIZE);
@@ -394,11 +600,11 @@ void HashTable::obliviousBlocksIntoBins()
             bins.insert(bins.end(), bin_1.begin(), bin_1.end());
             chunks.first.clear(), chunks.second.clear();
             chunks.first.push_back(bin_index * 2 * conf.BIN_SIZE), chunks.second.push_back((bin_index + 1) * conf.BIN_SIZE + conf.BIN_SIZE);
-            next_ram.writeChunks(chunks.first.data(), chunks.second.data(), bins);
+            next_ram.writeChunks(chunks.first.data(), chunks.second.data(), bins,chunks.first.size());
             ++first_bin_index;
-            if (first_bin_index % 1<<bit_num == 0)
+            if (first_bin_index % 1 << bit_num == 0)
             {
-                first_bin_index += 1<<bit_num;
+                first_bin_index += 1 << bit_num;
             }
         }
         LocalRAM temp = current_ram;
@@ -421,8 +627,8 @@ void HashTable::_obliviousBlocksIntoBinsFirstIteration(ObliviousSort &oblivious_
         vector<Block> bins(bin_0.begin(), bin_0.end());
         bins.insert(bins.end(), bin_1.begin(), bin_1.end());
         chunks.first.clear(), chunks.second.clear();
-        chunks.first.push_back(2*current_bin_pos), chunks.second.push_back(2*current_bin_pos + 2*conf.BIN_SIZE);
-        second_overflow_ram.writeChunks(chunks.first.data(), chunks.second.data(), bins);
+        chunks.first.push_back(2 * current_bin_pos), chunks.second.push_back(2 * current_bin_pos + 2 * conf.BIN_SIZE);
+        second_overflow_ram.writeChunks(chunks.first.data(), chunks.second.data(), bins,chunks.first.size());
         current_bin_pos += conf.BIN_SIZE;
     }
 }
@@ -476,7 +682,7 @@ void HashTable::cuckooOverflow()
 
         // 写入overflow_ram
         vector<Block> cuckoo_data = cuckoo.get_cuckoo_data();
-        overflow_ram.writeChunks(chunks.first.data(), chunks.second.data(), cuckoo_data);
+        overflow_ram.writeChunks(chunks.first.data(), chunks.second.data(), cuckoo_data,chunks.first.size());
 
         // 将用cuckoohash组织过的数据写入stash
         addToStash(cuckoo.get_stash());
@@ -484,101 +690,8 @@ void HashTable::cuckooOverflow()
     }
 }
 
-// 辅助方法
-std::vector<Block> HashTable::localTightCompaction(const std::vector<Block> &blocks,
-                                                   std::vector<uint8_t> &states)
-{
-    std::vector<Block> dummy, result;
-    for (auto block : blocks)
-    {
-        if (block.state == 1 == 0)
-        {
-            dummy.push_back(block);
-        }
-        else
-        {
-            result.push_back(block);
-        }
-    }
-    result.insert(result.end(), dummy.begin(), dummy.end());
-    return result;
-}
 
-void HashTable::blocksIntoBins()
-{
-    std::vector<Block> blocks;
-    if (conf.FINAL)
-    {
-        std::swap(data_ram, bins_ram);
-    }
-    for (size_t i = 0; i < conf.NUMBER_OF_BINS; ++i)
-    {
-        blocks.push_back(data_ram.readBlock(i));
-        _blocksIntoBins(blocks);
-    }
-    conf.reset();
-}
 
-void HashTable::_blocksIntoBins(const std::vector<Block> &blocks)
-{
-    std::unordered_map<size_t, std::vector<Block>> bin_map;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<size_t> dist(0, conf.NUMBER_OF_BINS - 1);
-
-    // 分桶逻辑
-    for (const auto &block : blocks)
-    {
-        size_t target_bin;
-        //这里随机分桶的逻辑可能要改
-        if (block.state == 0)
-        {
-            target_bin = dist(gen); // 随机分桶
-        }
-        else
-        {
-            target_bin = byte_ops.blockToPseudoRandomNumber(block, conf.NUMBER_OF_BINS);
-        }
-
-        bin_map[target_bin].push_back(block);
-    }
-
-    // 准备写入操作
-
-    //提取键值
-    vector<std::pair<size_t,Block>> bins_capacity;
-    for(auto bin_num : bin_map)
-    {
-        bins_capacity.push_back({bin_num.first,bins_ram.readBlock(bin_num.first)});
-    }
-    std::vector<std::pair<size_t, size_t>> write_chunks;
-    std::vector<Block> write_blocks;
-
-    for (auto [bin_num, cpacity_block] : bins_capacity)
-    {
-        size_t capacity = byte_ops.getCapacity(cpacity_block);
-        // 容量检查
-        if (capacity >= 2 * conf.MU - 1)
-        {
-            throw std::runtime_error("Bin " + std::to_string(bin_num) + " overflow");
-        }
-
-        //以block为单位的BIN地址
-        //这里bin_loc到bin_write_loc中间的capacity和1分别代表原来的blocks和新加的capacity_block
-        size_t bin_loc = bin_num * conf.BIN_SIZE,bin_writer_loc = bin_loc + capacity + 1;
-        vector<Block> new_blocks = bin_map[bin_num];
-
-        //更新容量
-        Block new_capacity_block = Block(capacity + new_blocks.size(), 0, 0);
-        write_chunks.push_back(std::make_pair(bin_loc, bin_loc + 1));
-        write_blocks.push_back(new_capacity_block);
-
-        //balls into bin
-        write_chunks.push_back(std::make_pair(bin_writer_loc, bin_writer_loc + new_blocks.size()));
-        write_blocks.insert(write_blocks.end(), new_blocks.begin(), new_blocks.end());
-    }
-    bins_ram.writeChunks(&write_chunks.data()->first, &write_chunks.data()->second, write_blocks);
-}
 
 // 将前一层的数据写入到当前层
 void HashTable::copyToEndOfBins(LocalRAM &seconf_data_ram, size_t reals)
@@ -682,7 +795,7 @@ void HashTable::obliviousBlocksIntoBinsExtract()
             chunks.second.push_back((bin_index + 1) * 2 * conf.BIN_SIZE);
             vector<Block> bins(bin_0.begin(), bin_0.end());
             bins.insert(bins.end(), bin_1.begin(), bin_1.end());
-            next_ram.writeChunks(chunks.first.data(), chunks.second.data(), bins);
+            next_ram.writeChunks(chunks.first.data(), chunks.second.data(), bins,chunks.first.size());
             first_bin_index++;
             if (first_bin_index % 2 * pow(2, bit_num) == 0)
             {
@@ -723,7 +836,7 @@ void HashTable::_intersperse(size_t start_loc, LocalRAM &storage, size_t offset)
     {
         vector<Block> blocks = byte_ops.readTransposed(storage, offset, start_loc + i, 2 * conf.MU);
         // 创建一个随机数生成器 打乱向量中的元素
-        std::default_random_engine rng();
+        std::default_random_engine rng;
         std::shuffle(blocks.begin(), blocks.end(), rng);
         byte_ops.writeTransposed(storage, blocks, offset, start_loc + i);
     }
